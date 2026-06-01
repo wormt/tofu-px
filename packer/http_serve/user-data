@@ -1,0 +1,30 @@
+#cloud-config
+autoinstall:
+  version: 1
+  ssh:
+    install-server: true
+    allow-pw: true
+    disable_root: true
+    ssh_quiet_keygen: true
+    allow_public_ssh_keys: true
+  packages:
+    - qemu-guest-agent
+    - unattended-upgrades
+    - fail2ban
+    - ufw
+    - curl
+  storage:
+    layout:
+      name: lvm
+  user-data:
+    package_upgrade: false
+    timezone: America/Los_Angeles
+    users:
+      - name: "${vm_user}"
+        passwd: "${user_password_hash}"
+        groups: [sudo]
+        lock_passwd: false
+        sudo: ALL=(ALL) NOPASSWD:ALL
+        shell: /bin/bash
+        ssh_authorized_keys:
+          - "${ssh_public_key}"

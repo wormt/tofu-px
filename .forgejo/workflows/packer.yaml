@@ -1,0 +1,61 @@
+---
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'packer/**'
+      - '.forgejo/workflows/packer.yaml'
+  workflow_dispatch:
+    inputs:
+      build:
+        description: "Run `packer build`?"
+        required: true
+        default: false
+        type: "boolean"
+
+jobs:
+  packer:
+    name: "Packer Build"
+    runs-on: "docker"
+    defaults:
+      run:
+        working-directory: packer
+    container:
+      image: "cgr.dev/chainguard/wolfi-base:latest"
+      env:
+        PKR_VAR_px_token: "${{ secrets.PROXMOX_API_KEY }}"
+        PKR_VAR_ssh_public_key: "${{ secrets.SSH_PUBLIC_KEY }}"
+        PKR_VAR_user_password_hash: "${{ secrets.PACKER_USER_PASSWORD_HASH }}"
+        PKR_VAR_ssh_password: "${{ secrets.PACKER_SSH_PASSWORD }}"
+    steps:
+      - name: "Install necessary packages"
+        run: |
+          set -euo pipefail
+          apk update --no-progress
+          apk add --no-progress --no-cache \
+            curl unzip ca-certificates git
+      - name: "Install Packer"
+        run: |
+          set -euo pipefail
+          PACKER_VERSION="1.15.3"
+          curl -fsSL -o /tmp/packer.zip \
+            "https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip"
+          unzip -o /tmp/packer.zip -d /usr/local/bin/
+          chmod +x /usr/local/bin/packer
+          packer version
+      - name: "Checkout repository"
+        uses: "actions/checkout@v6"
+      - name: "Initialize Packer plugins"
+        run: |
+          set -euo pipefail
+          packer init .
+      - name: "Validate Packer configuration"
+        run: |
+          set -euo pipefail
+          packer validate -var-file=".pkrvars.hcl" .
+      - name: "Build and replace template"
+        if: "${{ github.ref == 'refs/heads/main' && github.event_name == 'push' || github.event_name == 'workflow_dispatch' && inputs.build }}"
+        run: |
+          set -euo pipefail
+          packer build -force -var-file=".pkrvars.hcl" .

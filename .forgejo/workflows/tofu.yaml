@@ -1,0 +1,83 @@
+---
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'tofu/**'
+      - '.forgejo/workflows/tofu.yaml'
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "Run `tofu apply`?"
+        required: true
+        default: false
+        type: "boolean"
+      apply_wait:
+        description: "Wait x seconds before running `tofu apply`:"
+        required: true
+        default: 60
+        type: "number"
+
+jobs:
+  tofu:
+    name: "OpenTofu"
+    runs-on: "docker"
+    defaults:
+      run:
+        working-directory: tofu
+    steps:
+      - name: "Install necessary packages."
+        run: >-
+          apk update --no-progress && apk upgrade -la --no-progress --no-cache
+          && apk add --no-progress --no-cache \
+            trivy opentofu-1.11 git
+      - name: "Checkout our git repository."
+        uses: "actions/checkout@v6"
+      - name: "Ensure our OpenTofu workspace is properly formatted."
+        run: |
+          set -euo pipefail
+          tofu fmt -check
+      - name: "Ensure our providers & backend are functional."
+        run: |
+          set -euo pipefail
+          tofu init -reconfigure -backend-config=backend.conf
+      - name: "Ensure our workspace can read our environment."
+        run: |
+          set -euo pipefail
+          tofu plan -out="terraform.plan"
+      - name: "Scan our OpenTofu workspace for misconfigurations."
+        run: |
+          set -euo pipefail
+          trivy config -qc ../.trivy.yaml terraform.plan
+      - name: "Apply our changes to our environment."
+        if: "${{ github.ref == 'refs/heads/main' && github.event_name == 'push' || github.event_name == 'workflow_dispatch' && inputs.apply }}"
+        run: |
+          set -euo pipefail
+          sleep "${{ inputs.apply_wait }}"
+          tofu apply -auto-approve terraform.plan
+    container:
+      image: "cgr.dev/chainguard/wolfi-base:latest"
+      env:
+        TF_VAR_env: |-
+          {
+            "environment_name": "prod",
+            "s3_endpoint": "https://s3.us-west-2.idrivee2.com/",
+            "s3_bucket": "tfstate",
+            "skip_validation": true,
+            "pve_endpoint": "https://[fd67::200]:8006/"
+          }
+        TF_VAR_auth: |-
+          {
+            "users": [
+              "tofu-px@pam",
+              "root@pam"
+            ],
+            "passwords": [
+              "${{ secrets.PROXMOX_API_KEY }}",
+              "${{ secrets.AUTH_PASS1 }}"
+            ]
+          }
+        AWS_REGION: "us-west-2"
+        AWS_ACCESS_KEY_ID: "O1sh3RhWxWbn5bgOmflT"
+        AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
