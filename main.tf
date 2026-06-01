@@ -16,3 +16,15 @@ resource "proxmox_virtual_environment_storage_pbs" "pxb1" {
 
   disable = false
 }
+
+resource "proxmox_virtual_environment_dns" "px_dns" {
+  for_each  = toset(data.proxmox_virtual_environment_nodes.datacenter.names)
+  node_name = each.value
+
+  domain = "local"
+  servers = [
+    "2606:1a40::",
+    "76.76.2.0",
+    "9.9.9.9"
+  ]
+}
