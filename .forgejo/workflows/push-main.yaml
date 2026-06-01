@@ -1,5 +1,8 @@
 ---
-on: [ 'push', 'workflow_dispatch' ]
+on:
+  push:
+    branch: 'main'
+  workflow_dispatch: {}
 jobs:
   tofu:
     name: 'tofu'
@@ -11,7 +14,10 @@ jobs:
           set -e
           tofu fmt -check
           tofu init -reconfigure
-          tofu plan
+          tofu plan -detailed-exitcode
+          if [ $? -eq 2 ]; then
+            tofu apply -auto-approve
+          fi
     container:
       image: 'code.forgejo.org/oci/node:lts'
       env:
