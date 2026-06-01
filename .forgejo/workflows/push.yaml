@@ -27,8 +27,8 @@ jobs:
               "root@pam"
             ],
             "passwords": [
-              ${{ secrets.AUTH_PASS0 }},
-              ${{ secrets.AUTH_PASS1 }}
+              "${{ secrets.AUTH_PASS0 }}",
+              "${{ secrets.AUTH_PASS1 }}"
             ]
           }
         AWS_REGION: 'us-west-2'
