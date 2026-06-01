@@ -43,9 +43,7 @@ jobs:
           set -euo pipefail
           trivy config -qc .trivy.yaml \
             "${{ env.FORGEJO_WORKSPACE }}/terraform.plan"
-      - name: >-
-          Apply our changes to our environment in
-          ${{ inputs.apply_waits }} seconds.
+      - name: 'Apply our changes to our environment.'
         if: '${{ inputs.apply }}'
         run: |
           set -euo pipefail
