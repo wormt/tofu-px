@@ -4,8 +4,8 @@ on:
     branches:
       - main
     paths:
-      - 'packer/**'
-      - '.forgejo/workflows/packer.yaml'
+      - "packer/**"
+      - ".forgejo/workflows/packer.yaml"
   workflow_dispatch:
     inputs:
       build:
@@ -34,7 +34,7 @@ jobs:
           set -euo pipefail
           apk update --no-progress
           apk add --no-progress --no-cache \
-            curl unzip ca-certificates git
+            curl unzip ca-certificates git nodejs-24
       - name: "Install Packer"
         run: |
           set -euo pipefail
@@ -55,7 +55,8 @@ jobs:
           set -euo pipefail
           packer validate -var-file=".pkrvars.hcl" .
       - name: "Build and replace template"
-        if: "${{ github.ref == 'refs/heads/main' && github.event_name == 'push' || github.event_name == 'workflow_dispatch' && inputs.build }}"
+        if: "${{ github.ref == 'refs/heads/main' && github.event_name == 'push' ||
+          github.event_name == 'workflow_dispatch' && inputs.build }}"
         run: |
           set -euo pipefail
           packer build -force -var-file=".pkrvars.hcl" .

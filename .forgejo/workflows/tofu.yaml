@@ -4,8 +4,8 @@ on:
     branches:
       - main
     paths:
-      - 'tofu/**'
-      - '.forgejo/workflows/tofu.yaml'
+      - "tofu/**"
+      - ".forgejo/workflows/tofu.yaml"
   workflow_dispatch:
     inputs:
       apply:
@@ -31,7 +31,7 @@ jobs:
         run: >-
           apk update --no-progress && apk upgrade -la --no-progress --no-cache
           && apk add --no-progress --no-cache \
-            trivy opentofu-1.11 git
+            trivy opentofu-1.11 git nodejs-24
       - name: "Checkout our git repository."
         uses: "actions/checkout@v6"
       - name: "Ensure our OpenTofu workspace is properly formatted."
@@ -51,7 +51,8 @@ jobs:
           set -euo pipefail
           trivy config -qc ../.trivy.yaml terraform.plan
       - name: "Apply our changes to our environment."
-        if: "${{ github.ref == 'refs/heads/main' && github.event_name == 'push' || github.event_name == 'workflow_dispatch' && inputs.apply }}"
+        if: "${{ github.ref == 'refs/heads/main' && github.event_name == 'push' ||
+          github.event_name == 'workflow_dispatch' && inputs.apply }}"
         run: |
           set -euo pipefail
           sleep "${{ inputs.apply_wait }}"
