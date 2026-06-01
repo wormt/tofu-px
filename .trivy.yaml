@@ -1,6 +1,6 @@
 ---
 config: '.trivy.yaml'
-debug: true
+# debug: true
 # ignorefile: '.trivyignore'
 misconfiguration:
   scanners:
@@ -9,6 +9,9 @@ misconfiguration:
     - 'terraformplan-snapshot'
   terraform:
     exclude-downloaded-modules: false
+exit-code: 1
+format: 'github'
+report: 'all'
 scan:
   disable-telemetry: true
 severity:
