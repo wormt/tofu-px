@@ -10,7 +10,7 @@ misconfiguration:
   terraform:
     exclude-downloaded-modules: false
 exit-code: 1
-format: 'github'
+format: 'table'
 report: 'all'
 scan:
   disable-telemetry: true
@@ -20,3 +20,6 @@ severity:
   - 'MEDIUM'
   - 'HIGH'
   - 'CRITICAL'
+table-mode:
+    - summary
+    - detailed
