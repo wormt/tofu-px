@@ -43,8 +43,8 @@ jobs:
           tofu apply -auto-approve "${{ env.FORGEJO_WORKSPACE }}/terraform.plan"
 
     container:
-      # image: 'docker.io/node:lts'
-      image: 'cgr.dev/chainguard/node:latest'
+      image: 'docker.io/node:lts'
+      # image: 'cgr.dev/chainguard/node:latest'
       env:
         TF_VAR_env: |-
           {
