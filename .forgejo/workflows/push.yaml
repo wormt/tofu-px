@@ -26,6 +26,7 @@ jobs:
           tofu fmt -check
           tofu init -reconfigure
           tofu plan -out="${{ env.FORGEJO_WORKSPACE }}/terraform.plan"
+          echo $PATH
       - name: 'Run Trivy vulnerability scanner in IaC mode'
         uses: 'aquasecurity/trivy-action@0.34.1'
         with:
