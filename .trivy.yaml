@@ -1,7 +1,5 @@
 ---
 config: '.trivy.yaml'
-# debug: true
-# ignorefile: '.trivyignore'
 misconfiguration:
   scanners:
     - 'terraform'
@@ -21,5 +19,5 @@ severity:
   - 'HIGH'
   - 'CRITICAL'
 table-mode:
-    - summary
-    - detailed
+  - 'summary'
+  - 'detailed'
