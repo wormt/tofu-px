@@ -4,6 +4,7 @@ variable "env" {
     s3_bucket        = string
     s3_endpoint      = string
     skip_validation  = bool
+    pve_endpoint     = string
   })
 }
 

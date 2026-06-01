@@ -20,7 +20,7 @@ terraform {
 }
 
 provider "proxmox" {
-  endpoint = "https://[fd00::200]:8006/"
+  endpoint = var.env.pve_endpoint
   username = var.auth.users[0]
   password = var.auth.passwords[0]
   insecure = true
