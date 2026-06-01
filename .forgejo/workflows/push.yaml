@@ -20,9 +20,10 @@ jobs:
     steps:
       - name: 'Install necessary packages.'
         run: >-
-          apk update &&
-          apk upgrade -la &&
-          apk add trivy opentofu-1.11 git nodejs-25
+          apk update --no-progress &&
+          apk upgrade -la --no-progress --no-cache &&
+          apk add --no-progress --no-cache \
+            trivy opentofu-1.11 git nodejs-25
       - uses: 'actions/checkout@v6'
       # - uses: 'https://github.com/opentofu/setup-opentofu@v1'
       - name: 'Validate our environment.'
@@ -31,7 +32,7 @@ jobs:
           tofu fmt -check
           tofu init -reconfigure
           tofu plan -out="${{ env.FORGEJO_WORKSPACE }}/terraform.plan"
-          trivy config -c .trivy.yaml \
+          trivy config -qc .trivy.yaml \
             "${{ env.FORGEJO_WORKSPACE }}/terraform.plan"
       - name: 'Apply our changes to our environment.'
         if: '${{ inputs.apply }}'
