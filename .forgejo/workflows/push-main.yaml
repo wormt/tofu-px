@@ -14,8 +14,9 @@ jobs:
           set -e
           tofu fmt -check
           tofu init -reconfigure
-          tofu plan -detailed-exitcode
-          if [ $? -eq 2 ]; then
+          tofu plan -detailed-exitcode; status=$?
+          echo "exit code: $status"
+          if [ "$status" -eq 2 ]; then
             tofu apply -auto-approve
           fi
     container:
