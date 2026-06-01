@@ -22,7 +22,7 @@ jobs:
         run: >-
           apk update &&
           apk upgrade -la &&
-          apk add trivy opentofu git node
+          apk add trivy opentofu-1.11 git nodejs-25
       - uses: 'actions/checkout@v6'
       # - uses: 'https://github.com/opentofu/setup-opentofu@v1'
       - name: 'Validate our environment.'
