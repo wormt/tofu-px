@@ -23,9 +23,7 @@ jobs:
   tofu:
     name: "OpenTofu"
     runs-on: "docker"
-    defaults:
-      run:
-        working-directory: tofu
+    # TODO: verify these working-directory steps actually work since i haven't yet
     steps:
       - name: "Install necessary packages."
         run: >-
@@ -38,18 +36,22 @@ jobs:
         run: |
           set -euo pipefail
           tofu fmt -check
+        working-directory: tofu
       - name: "Ensure our providers & backend are functional."
         run: |
           set -euo pipefail
           tofu init -reconfigure -backend-config=backend.conf
+        working-directory: tofu
       - name: "Ensure our workspace can read our environment."
         run: |
           set -euo pipefail
           tofu plan -out="terraform.plan"
+        working-directory: tofu
       - name: "Scan our OpenTofu workspace for misconfigurations."
         run: |
           set -euo pipefail
           trivy config -qc ../.trivy.yaml terraform.plan
+        working-directory: tofu
       - name: "Apply our changes to our environment."
         if: "${{ github.ref == 'refs/heads/main' && github.event_name == 'push' ||
           github.event_name == 'workflow_dispatch' && inputs.apply }}"
@@ -57,6 +59,7 @@ jobs:
           set -euo pipefail
           sleep "${{ inputs.apply_wait }}"
           tofu apply -auto-approve terraform.plan
+        working-directory: tofu
     container:
       image: "cgr.dev/chainguard/wolfi-base:latest"
       env:

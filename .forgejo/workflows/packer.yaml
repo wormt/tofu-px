@@ -18,16 +18,16 @@ jobs:
   packer:
     name: "Packer Build"
     runs-on: "docker"
-    defaults:
-      run:
-        working-directory: packer
     container:
       image: "cgr.dev/chainguard/wolfi-base:latest"
       env:
         PKR_VAR_px_token: "${{ secrets.PROXMOX_API_KEY }}"
+        PKR_VAR_px_hostname: "${{ vars.PROXMOX_VE_HOSTNAME }}"
+        PKR_VAR_px_user: "${{ vars.PROXMOX_VE_USERNAME }}"
         PKR_VAR_ssh_public_key: "${{ secrets.SSH_PUBLIC_KEY }}"
         PKR_VAR_user_password_hash: "${{ secrets.PACKER_USER_PASSWORD_HASH }}"
         PKR_VAR_ssh_password: "${{ secrets.PACKER_SSH_PASSWORD }}"
+        PKR_VAR_vm_user: "${{ vars.PACKER_VM_USER }}"
     steps:
       - name: "Install necessary packages"
         run: |
@@ -50,13 +50,16 @@ jobs:
         run: |
           set -euo pipefail
           packer init .
+        working-directory: packer
       - name: "Validate Packer configuration"
         run: |
           set -euo pipefail
-          packer validate -var-file=".pkrvars.hcl" .
+          packer validate .
+        working-directory: packer
       - name: "Build and replace template"
         if: "${{ github.ref == 'refs/heads/main' && github.event_name == 'push' ||
           github.event_name == 'workflow_dispatch' && inputs.build }}"
         run: |
           set -euo pipefail
-          packer build -force -var-file=".pkrvars.hcl" .
+          packer build -force .
+        working-directory: packer
