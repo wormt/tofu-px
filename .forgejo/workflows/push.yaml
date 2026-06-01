@@ -24,7 +24,8 @@ jobs:
           apk upgrade -la --no-progress --no-cache &&
           apk add --no-progress --no-cache \
             trivy opentofu-1.11 git nodejs-25
-      - uses: 'actions/checkout@v6'
+      - name: 'Checkout our git repository'
+        uses: 'actions/checkout@v6'
       - name: 'Ensure our OpenTofu workspace is properly formatted.'
         run: |
           set -euo pipefail
