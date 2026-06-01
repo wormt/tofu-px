@@ -25,18 +25,29 @@ jobs:
           apk add --no-progress --no-cache \
             trivy opentofu-1.11 git nodejs-25
       - uses: 'actions/checkout@v6'
-      # - uses: 'https://github.com/opentofu/setup-opentofu@v1'
-      - name: 'Validate our environment.'
+      - name: 'Ensure our OpenTofu workspace is properly formatted.'
         run: |
           set -euo pipefail
           tofu fmt -check
+      - name: 'Ensure our providers & backend are functional.'
+        run: |
+          set -euo pipefail
           tofu init -reconfigure
+      - name: 'Ensure our workspace can read our environment.'
+        run: |
+          set -euo pipefail
           tofu plan -out="${{ env.FORGEJO_WORKSPACE }}/terraform.plan"
+      - name: 'Scan our OpenTofu workspace for misconfigurations.'
+        run: |
+          set -euo pipefail
           trivy config -qc .trivy.yaml \
             "${{ env.FORGEJO_WORKSPACE }}/terraform.plan"
-      - name: 'Apply our changes to our environment.'
+      - name: >-
+          Apply our changes to our environment in
+          ${{ inputs.apply_waits }} seconds.
         if: '${{ inputs.apply }}'
         run: |
+          set -euo pipefail
           sleep "${{ inputs.apply_wait }}"
           tofu apply -auto-approve "${{ env.FORGEJO_WORKSPACE }}/terraform.plan"
 
