@@ -1,0 +1,36 @@
+---
+on: [ 'push' ]
+jobs:
+  tofu:
+    name: 'tofu'
+    runs-on: 'docker'
+    steps:
+      - uses: 'actions/checkout@v4'
+      - uses: 'https://github.com/opentofu/setup-opentofu@v1'
+      - run: 'tofu fmt -check'
+      - run: 'tofu init -reconfigure'
+      - run: 'tofu plan'
+    container:
+      image: 'code.forgejo.org/oci/node:lts'
+      env:
+        TF_VAR_env: |-
+          {
+            "environment_name": "prod",
+            "s3_endpoint": "https://s3.us-west-2.idrivee2.com/",
+            "s3_bucket": "tfstate",
+            "skip_validation": true
+          }
+        TF_VAR_auth: |-
+          {
+            "users": [
+              "root@pam",
+              "root@pam"
+            ],
+            "passwords": [
+              ${{ secrets.AUTH_PASS0 }},
+              ${{ secrets.AUTH_PASS1 }}
+            ]
+          }
+        AWS_REGION: 'us-west-2'
+        AWS_ACCESS_KEY_ID: 'O1sh3RhWxWbn5bgOmflT'
+        AWS_SECRET_ACCESS_KEY: '${{ secrets.AWS_SECRET_ACCESS_KEY }}'
