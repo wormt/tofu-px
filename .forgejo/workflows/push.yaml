@@ -1,19 +1,40 @@
 ---
-on: [ 'push', 'workflow_dispatch' ]
+on:
+  push: {}
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: 'Run `tofu apply`?'
+        required: true
+        default: false
+        type: 'bool'
+      apply_wait:
+        description: 'Wait x seconds before running `tofu apply`:'
+        required: true
+        default: 60
+        type: 'number'
 jobs:
-  tofu:
-    name: 'tofu'
+  plan:
+    name: 'tofu plan'
     runs-on: 'docker'
     steps:
-      - uses: 'actions/checkout@v4'
+      - uses: 'actions/checkout@v6'
       - uses: 'https://github.com/opentofu/setup-opentofu@v1'
-      - run: |
+      - name: 'Validate our environment.'
+        run: |
           set -e
           tofu fmt -check
           tofu init -reconfigure
-          tofu plan
+          tofu plan -out="${{ env.FORGEJO_WORKSPACE }}/terraform.plan"
+      - name: 'Apply our changes to our environment.'
+        if: '${{ inputs.apply }}'
+        run: |
+          sleep "${{ inputs.apply_wait }}"
+          tofu apply -auto-approve "${{ env.FORGEJO_WORKSPACE }}/terraform.plan"
+
     container:
-      image: 'code.forgejo.org/oci/node:lts'
+      # image: 'docker.io/node:lts'
+      image: 'cgr.dev/chainguard/node:latest'
       env:
         TF_VAR_env: |-
           {
