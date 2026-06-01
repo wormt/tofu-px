@@ -12,6 +12,7 @@ let tfenv = {
   "s3_endpoint": "https://s3.us-west-2.idrivee2.com/"
   "s3_bucket": "tfstate"
   "skip_validation": true
+  "pve_endpoint": "https://[fd00::200]:8006/"
 }
 
 $env.TF_VAR_env = ($tfenv|to json)
