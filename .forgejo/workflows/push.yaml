@@ -14,8 +14,8 @@ on:
         default: 60
         type: 'number'
 jobs:
-  plan:
-    name: 'tofu plan'
+  tofu:
+    name: 'OpenTofu'
     runs-on: 'docker'
     steps:
       - uses: 'actions/checkout@v6'
@@ -26,6 +26,16 @@ jobs:
           tofu fmt -check
           tofu init -reconfigure
           tofu plan -out="${{ env.FORGEJO_WORKSPACE }}/terraform.plan"
+      - name: 'Run Trivy vulnerability scanner in IaC mode'
+        uses: 'aquasecurity/trivy-action@0.33.1'
+        with:
+          scan-type: 'config'
+          scan-ref: '${{ env.FORGEJO_WORKSPACE }}/terraform.plan'
+          trivy-config: '.trivy.yaml'
+          hide-progress: true
+          format: 'github'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN'
       - name: 'Apply our changes to our environment.'
         if: '${{ inputs.apply }}'
         run: |
