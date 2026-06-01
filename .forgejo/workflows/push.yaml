@@ -18,12 +18,16 @@ jobs:
     name: 'OpenTofu'
     runs-on: 'docker'
     steps:
+      - name: 'Install necessary packages.'
+        run: >-
+          apk update &&
+          apk upgrade -la &&
+          apk add trivy opentofu git node
       - uses: 'actions/checkout@v6'
-      - uses: 'https://github.com/opentofu/setup-opentofu@v1'
+      # - uses: 'https://github.com/opentofu/setup-opentofu@v1'
       - name: 'Validate our environment.'
         run: |
           set -euo pipefail
-          apt update && apt upgrade && apt install trivy
           tofu fmt -check
           tofu init -reconfigure
           tofu plan -out="${{ env.FORGEJO_WORKSPACE }}/terraform.plan"
@@ -44,8 +48,9 @@ jobs:
           tofu apply -auto-approve "${{ env.FORGEJO_WORKSPACE }}/terraform.plan"
 
     container:
-      image: 'docker.io/node:lts'
+      # image: 'docker.io/node:lts'
       # image: 'cgr.dev/chainguard/node:latest'
+      image: 'cgr.dev/chainguard/wolfi-base:latest'
       env:
         TF_VAR_env: |-
           {
