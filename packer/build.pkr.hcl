@@ -34,6 +34,7 @@ source "proxmox-iso" "ubuntu_resolute" {
       user_password_hash = var.user_password_hash
     })
     "/meta-data" = file("http_serve/meta-data")
+    "/network-data" = file("http_serve/network-data")
   }
   http_port_min = 6767
   http_port_max = 6767
