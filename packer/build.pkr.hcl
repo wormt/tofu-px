@@ -49,7 +49,7 @@ source "proxmox-iso" "ubuntu_resolute" {
 
   pool            = "packer"
   memory          = 4096
-  cores           = 1
+  cores           = 2
   sockets         = 1
   os              = "l26"
   scsi_controller = "virtio-scsi-pci"
