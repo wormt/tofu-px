@@ -28,3 +28,9 @@ autoinstall:
         shell: /bin/bash
         ssh_authorized_keys:
           - "${ssh_public_key}"
+  network:
+    version: 2
+    ethernets:
+      ens18:
+        dhcp4: true
+        dhcp6: false
