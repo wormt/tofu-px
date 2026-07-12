@@ -21,6 +21,7 @@ jobs:
     container:
       image: "cgr.dev/chainguard/wolfi-base:latest"
       env:
+        PACKER_LOG: "1"
         PKR_VAR_px_token: "${{ secrets.PROXMOX_API_KEY }}"
         PKR_VAR_px_hostname: "${{ vars.PROXMOX_VE_HOSTNAME }}"
         PKR_VAR_px_user: "${{ vars.PROXMOX_VE_USERNAME }}"
@@ -57,7 +58,8 @@ jobs:
           packer validate .
         working-directory: packer
       - name: "Build and replace template"
-        if: "${{ github.ref == 'refs/heads/main' && github.event_name == 'push' ||
+        if:
+          "${{ github.ref == 'refs/heads/main' && github.event_name == 'push' ||
           github.event_name == 'workflow_dispatch' && inputs.build }}"
         run: |
           set -euo pipefail
